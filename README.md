@@ -1,2 +1,2 @@
 # LeetCode
-my own impl for every exercise in LeetCode
+my own impl for exercises in LeetCode
