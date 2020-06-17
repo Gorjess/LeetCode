@@ -26,6 +26,83 @@ Note: Do not use class member/global/static variables to store states. Your ser
 
 package main
 
-func main() {
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
+type TreeNode struct {
+	Val   int
+	Left  *TreeNode
+	Right *TreeNode
+}
+
+type Codec struct {
+	vals []string
+}
+
+func Constructor() Codec {
+	return Codec{}
+}
+
+// Serializes a tree to a single string.
+func (c *Codec) serialize(root *TreeNode) string {
+	var result string
+	if root == nil {
+		result += "null,"
+	} else {
+		result += strconv.Itoa(root.Val) + c.serialize(root.Left) + c.serialize(root.Right)
+	}
+	return result
+}
+
+// Deserializes your encoded data to tree.
+func (c *Codec) deserialize(data string) *TreeNode {
+	var (
+		vals = strings.Split(data, ",")
+		sz   = len(vals)
+	)
+
+	c.vals = make([]string, sz)
+
+	for i := 0; i < sz; i++ {
+		c.vals[i] = vals[i]
+	}
+	return c.doDeserialize()
+}
+
+func (c *Codec) doDeserialize() *TreeNode {
+	//if len(c.vals) == 0 {
+	//	return nil
+	//}
+	if c.vals[0] == "null" {
+		c.vals = c.vals[1:]
+		return nil
+	}
+
+	val, _ := strconv.Atoi(c.vals[0])
+	c.vals = c.vals[1:]
+
+	root := &TreeNode{
+		Val:   val,
+		Left:  nil,
+		Right: nil,
+	}
+	root.Left = c.doDeserialize()
+	root.Right = c.doDeserialize()
+	return root
+}
+
+/**
+ * Your Codec object will be instantiated and called as such:
+ * obj := Constructor();
+ * data := obj.serialize(root);
+ * ans := obj.deserialize(data);
+ */
+
+func main() {
+	obj := Constructor()
+	node := obj.deserialize("1,2,3,null,null,4,5")
+	fmt.Println(node.Val)
 }
