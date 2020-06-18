@@ -50,33 +50,24 @@ func Constructor() Codec {
 func (c *Codec) serialize(root *TreeNode) string {
 	var result string
 	if root == nil {
-		result += "null,"
+		result += "^,"
 	} else {
-		result += strconv.Itoa(root.Val) + c.serialize(root.Left) + c.serialize(root.Right)
+		result += strconv.Itoa(root.Val) + "," + c.serialize(root.Left) + c.serialize(root.Right)
 	}
 	return result
 }
 
 // Deserializes your encoded data to tree.
 func (c *Codec) deserialize(data string) *TreeNode {
-	var (
-		vals = strings.Split(data, ",")
-		sz   = len(vals)
-	)
-
-	c.vals = make([]string, sz)
-
-	for i := 0; i < sz; i++ {
-		c.vals[i] = vals[i]
-	}
+	c.vals = strings.Split(data, ",")
 	return c.doDeserialize()
 }
 
 func (c *Codec) doDeserialize() *TreeNode {
-	//if len(c.vals) == 0 {
-	//	return nil
-	//}
-	if c.vals[0] == "null" {
+	if len(c.vals) == 0 {
+		return nil
+	}
+	if c.vals[0] == "^" {
 		c.vals = c.vals[1:]
 		return nil
 	}
@@ -84,14 +75,9 @@ func (c *Codec) doDeserialize() *TreeNode {
 	val, _ := strconv.Atoi(c.vals[0])
 	c.vals = c.vals[1:]
 
-	root := &TreeNode{
-		Val:   val,
-		Left:  nil,
-		Right: nil,
-	}
-	root.Left = c.doDeserialize()
-	root.Right = c.doDeserialize()
-	return root
+	return &TreeNode{Val: val,
+		Left:  c.doDeserialize(),
+		Right: c.doDeserialize()}
 }
 
 /**
@@ -103,6 +89,7 @@ func (c *Codec) doDeserialize() *TreeNode {
 
 func main() {
 	obj := Constructor()
-	node := obj.deserialize("1,2,3,null,null,4,5")
-	fmt.Println(node.Val)
+	node := obj.deserialize("1,2,^,^,3,4,5")
+	ssli := obj.serialize(node)
+	fmt.Println(ssli)
 }
