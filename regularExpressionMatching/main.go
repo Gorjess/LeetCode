@@ -1,163 +1,44 @@
-/*10. Regular Expression Matching
-Given an input string (s) and a pattern (p), implement regular expression matching with support for '.' and '*'.
-
-'.' Matches any single character.
-'*' Matches zero or more of the preceding element.
-The matching should cover the entire input string (not partial).
-
-Note:
-
-s could be empty and contains only lowercase letters a-z.
-p could be empty and contains only lowercase letters a-z, and characters like . or *.
-Example 1:
-
-Input:
-s = "aa"
-p = "a"
-Output: false
-Explanation: "a" does not match the entire string "aa".
-Example 2:
-
-Input:
-s = "aa"
-p = "a*"
-Output: true
-Explanation: '*' means zero or more of the preceding element, 'a'. Therefore, by repeating 'a' once, it becomes "aa".
-Example 3:
-
-Input:
-s = "ab"
-p = ".*"
-Output: true
-Explanation: ".*" means "zero or more (*) of any character (.)".
-Example 4:
-
-Input:
-s = "aab"
-p = "c*a*b"
-Output: true
-Explanation: c can be repeated 0 times, a can be repeated 1 time. Therefore, it matches "aab".
-Example 5:
-
-Input:
-s = "mississippi"
-p = "mis*is*p*."
-Output: false
-
-来源：力扣（LeetCode）
-链接：https://leetcode-cn.com/problems/regular-expression-matching
-著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。*/
-
 package main
 
-import (
-	"fmt"
-	"time"
-)
+import "fmt"
 
-// todo: test space-complexity between pointer and struct
-type subPattern struct {
-	letter  uint8
-	pattern uint8
-}
-
-/*
-'.' Matches any single character.
-'*' Matches zero or more of the preceding element.
-The matching should cover the entire input string (not partial).
-*/
+// the char 'x' among any of the following comments means
+// the value of the character indexed by j in pattern p.
 func isMatch(s string, p string) bool {
-	start := time.Now()
-	patternStack := make([]*subPattern, 0, len(p)) // pattern for each letter
-	sp := new(subPattern)
-
-	ca := uint8(97)  // ascii for 'a'
-	cz := uint8(122) // ascii for 'z'
-
-	// isLowerLtr returns if in is a lowercase letter
-	isLowerLtr := func(in uint8) bool {
-		return ca <= in && in <= cz
-	}
-	// isStar returns if in is a *
-	isStar := func(in uint8) bool {
-		return in == uint8('*')
-	}
-	// isDot returns if in is a .
-	isDot := func(in uint8) bool {
-		return in == uint8('.')
-	}
-
-	for i := 0; i < len(p); i++ {
-		char := p[i]
-		if !isStar(char) && !isDot(char) && !isLowerLtr(char) {
+	m, n := len(s), len(p)
+	matches := func(i, j int) bool {
+		if i == 0 {
 			return false
 		}
-
-		if isStar(char) {
-			sp.pattern = char
-		} else {
-			if sp.letter != 0 { // we got a new letter
-				sp = new(subPattern)
-			}
-			sp.letter = char
-			patternStack = append(patternStack, sp)
+		if p[j-1] == '.' {
+			return true
 		}
+		return s[i-1] == p[j-1]
 	}
 
-	var (
-		cursor = 0
-		head   *subPattern
-	)
-
-	for len(patternStack) > 0 {
-		head = patternStack[0]
-		patternStack = patternStack[1:]
-
-		if cursor >= len(s) {
-			if isStar(head.pattern) {
-				continue
-			} else {
-				return false
-			}
-		}
-
-		if !isDot(head.letter) {
-			if head.letter != s[cursor] {
-				if !isStar(head.pattern) {
-					return false
+	f := make([][]bool, m+1)
+	for i := 0; i < len(f); i++ {
+		f[i] = make([]bool, n+1)
+	}
+	f[0][0] = true
+	for i := 0; i <= m; i++ {
+		for j := 1; j <= n; j++ {
+			if p[j-1] == '*' {
+				f[i][j] = f[i][j-2]  // situation-1: assume that "x*" matches no character in s
+				if matches(i, j-1) { // situation-2: check if 'x' matches s[i]
+					// f[i][j] is true as long as one of the above two situations returns true.
+					// so the operator "||" is used here
+					f[i][j] = f[i][j] || f[i-1][j]
 				}
-				continue
-			}
-			cursor++
-		}
-
-		if isStar(head.pattern) {
-			if isDot(head.letter) && len(patternStack) == 0 {
-				return true
-			}
-			for cursor < len(s) {
-				if s[cursor] == head.letter {
-					cursor++
-				} else if isDot(head.letter) {
-					if s[cursor] == patternStack[1].letter {
-						break
-					}
-				} else {
-					break
-				}
+			} else if matches(i, j) {
+				f[i][j] = f[i-1][j-1]
 			}
 		}
 	}
-
-	// pattern must cover the entire input string
-	if cursor >= len(s) && len(patternStack) == 0 {
-		fmt.Println(time.Now().Sub(start))
-		return true
-	}
-	fmt.Println(time.Now().Sub(start))
-	return false
+	return f[m][n]
 }
 
 func main() {
-	fmt.Println(isMatch("a", ".*..a*"))
+	fmt.Println(isMatch("aaa", "ab*a*c*a"))
+	//fmt.Println(isMatch("hello", "hel*o"))
 }
