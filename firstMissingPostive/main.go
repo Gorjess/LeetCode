@@ -25,20 +25,7 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-	"time"
 )
-
-func generateIntArray() []int {
-	rand.Seed(time.Now().UnixNano())
-	sz := rand.Intn(10)
-	offset := 20
-	out := make([]int, sz)
-	for i := 0; i < sz; i++ {
-		out[i] = rand.Intn(100) - offset
-	}
-	return out
-}
 
 func firstMissingPositive(nums []int) int {
 	sz := len(nums)
