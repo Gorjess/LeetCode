@@ -22,18 +22,22 @@ import (
 	"fmt"
 )
 
+// qSort recursivly calls partion to sort in in a decreasing order.
+// Note that tail is excluded in partion.
 func qSort(in []int, head, tail int) {
 	if head < tail {
 		flag := partion(in, head, tail)
-		qSort(in, head, flag)
-		qSort(in, flag+1, tail)
+		qSort(in, head, flag)   // elements before flag
+		qSort(in, flag+1, tail) // elements behind flag
 	}
 }
 
-// return index of a new pivot
-// pick the first elem as pivot
+// partion reorganizes elements in decreasing order
+// and returns the index of a new pivot.
 func partion(array []int, head, tail int) int {
+	// pick the first elem as pivot
 	pivot, flag := array[head], tail
+
 	swap := func(idxI, idxJ int) {
 		if idxI == idxJ {
 			return
