@@ -2,7 +2,6 @@
 #include <algorithm>
 #include <queue>
 #include <unordered_map>
-#include <unordered_set>
 
 #include "graph.h"
 
@@ -79,7 +78,6 @@ public:
     void Solve()
     {
         auto open_set = PriorityQ();
-        std::unordered_set<uint> closed_set;
         auto vn = m_graph->vertex_n();
 
         // starts from vertex-0
@@ -89,24 +87,20 @@ public:
         {
             auto top = open_set.min_priority();
             auto top_i = top.get_index();
-            closed_set.insert(top_i);
 
-            auto sub_arr = *(m_graph->sub_array(top_i));
+            auto sub_arr = m_graph->sub_array(top_i);
             for (int i = 0; i < vn; i++)
             {
-                if (i == top_i || closed_set.find(i) != closed_set.end())
+                if (i == top_i || m_closed_set[i] != 0 || (*sub_arr)[i] == 0)
                     continue;
-                // add adjacency vertex to open set
-                open_set.insert(i, sub_arr[i]);
+                if (m_closed_set[i] > (m_closed_set[top_i] + (*sub_arr)[i]))
+                {
+                    // update sum of weight
+                    m_closed_set[i] = m_closed_set[top_i] + (*sub_arr)[i];
+                    // add adjacency vertex to open set
+                    open_set.insert(i, (*sub_arr)[i]);                    
+                }
             }
-        }
-
-        auto vn = m_graph->vertex_n();
-        for (int i = 1; i < vn; ++i)
-        {
-            for (int j = 1; j < vn; ++j)
-                if (!m_closed_set[i] && m_graph->adjacent(0, i))
-                    m_open_set.push_back(j);
         }
     }
 
@@ -119,7 +113,7 @@ private:
     // graph
     Graph *m_graph;
     // closed set, contains vertices already expanded
-    std::vector<bool> m_closed_set;
+    std::vector<uint> m_closed_set;
     //
     PriorityQ m_pq;
 };
