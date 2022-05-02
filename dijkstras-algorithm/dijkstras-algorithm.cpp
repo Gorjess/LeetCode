@@ -106,7 +106,10 @@ public:
 
     void Print() const
     {
-        m_graph->Print();
+        std::cout << "Distance results:\n";
+        for (int i = 0; i < m_graph->vertex_n(); ++i)
+            std::cout << i << "\t\t" << m_closed_set[i] << std::endl;
+        std::cout << std::endl;
     }
 
 private:
@@ -120,8 +123,6 @@ private:
 
 int main()
 {
-    std::cout << "Hello, World!" << std::endl;
-
     auto graph = Graph(0.1, 10);
     auto dij = ShortestPath(graph);
     dij.Solve();

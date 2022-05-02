@@ -5,6 +5,7 @@
 #ifndef DIJKSTRAS_ALGORITHM_GRAPH_H
 #define DIJKSTRAS_ALGORITHM_GRAPH_H
 
+#include <iostream>
 #include <array>
 #include <algorithm>
 #include <queue>
@@ -93,7 +94,12 @@ public:
 
     void Print() const
     {
-
+        std::cout << "Original graph is:\n";
+        for (auto& sub_arr: m_graph)
+            for (auto& entry: sub_arr)
+                std::cout << entry << " ";
+            std::cout << std::endl;
+        std::cout << std::endl;
     }
 
 private:
