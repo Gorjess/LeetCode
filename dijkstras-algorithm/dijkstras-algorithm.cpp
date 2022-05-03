@@ -1,36 +1,30 @@
 #include <iostream>
-#include <algorithm>
 #include <queue>
 #include <unordered_map>
-#include <unordered_set>
 
 #include "graph.h"
 
 using pq_type = std::priority_queue<Vertex, std::vector<Vertex>, std::greater<>>;
 
-class PriorityQ
-{
+class PriorityQ {
 public:
     // changes the priority (vertex value) of queue element
-    void change_priority(uint idx, uint value)
-    {
+    void change_priority(uint idx, uint value) {
         auto iter = m_vertices.find(idx);
         if (iter != m_vertices.end())
             if (iter->second->get_value() <= value)
                 return;
-            iter->second->set_expired();
-        
+        iter->second->set_expired();
+
         auto vtx = Vertex{idx, value};
-        m_pq.push(vtx);  // todo: avoid copy, try use emplace.
+        m_pq.push(vtx);  // todo: try use emplace.
         m_vertices.insert({idx, &vtx});
     }
 
     // removes and returns the top element of the queue.
-    Vertex min_priority(bool remove= true)
-    {
+    Vertex min_priority(bool remove = true) {
         auto top = m_pq.top();
-        while (top.is_expired() && !m_pq.empty())
-        {
+        while (top.is_expired() && !m_pq.empty()) {
             m_pq.pop();
             top = m_pq.top();
         }
@@ -40,98 +34,90 @@ public:
     }
 
     // insert queue_element into queue
-    void insert(uint idx, uint value)
-    {
+    void insert(uint idx, uint value) {
         change_priority(idx, value);
     }
 
     // returns the top element of the queue.
-    Vertex top()
-    {
+    Vertex top() {
         return min_priority(false);
     }
 
     // return the number of queue_elements.
-    inline size_t size()
-    {
+    inline size_t size() {
         return m_pq.size();
     }
 
-    inline bool empty()
-    {
+    inline bool empty() {
         return m_pq.empty();
     }
 
 private:
     pq_type m_pq;
-    std::unordered_map<uint, Vertex*> m_vertices;
+    std::unordered_map<uint, Vertex *> m_vertices;
 };
 
-class ShortestPath
-{
+class ShortestPath {
 public:
-    explicit ShortestPath(Graph& dij_graph): m_graph(&dij_graph)
-    {
+    explicit ShortestPath(Graph &dij_graph) : m_graph(&dij_graph) {
         // pre-allocation
         m_closed_set.reserve(vertex_number);
     }
 
-    void Solve()
-    {
+    void Solve() {
         auto open_set = PriorityQ();
-        std::unordered_set<uint> closed_set;
         auto vn = m_graph->vertex_n();
 
         // starts from vertex-0
         open_set.insert(0, 0);
-        
-        while (!open_set.empty())
-        {
+
+        while (!open_set.empty()) {
             auto top = open_set.min_priority();
-            auto top_i = top.get_index();
-            closed_set.insert(top_i);
+            auto top_idx = top.get_index();
 
-            auto sub_arr = *(m_graph->sub_array(top_i));
-            for (int i = 0; i < vn; i++)
-            {
-                if (i == top_i || closed_set.find(i) != closed_set.end())
-                    continue;
+            auto sub_arr = m_graph->sub_array(top_idx);
+            for (int i = 0; i < vn; i++) {
+                auto weight_top2i = (*sub_arr)[i];
+                auto weight_sum_i = m_closed_set[i];
                 // add adjacency vertex to open set
-                open_set.insert(i, sub_arr[i]);
-            }
-        }
+                if (m_closed_set[top_idx] > weight_sum_i + weight_top2i) {
+                    m_closed_set[top_idx] = weight_sum_i + weight_top2i;
+                    open_set.insert(i, m_closed_set[top_idx]);
+                }
 
-        auto vn = m_graph->vertex_n();
-        for (int i = 1; i < vn; ++i)
-        {
-            for (int j = 1; j < vn; ++j)
-                if (!m_closed_set[i] && m_graph->adjacent(0, i))
-                    m_open_set.push_back(j);
+            }
         }
     }
 
-    void Print() const
-    {
-        m_graph->Print();
+    void Print() const {
+        float weight_sum = .0f, valid_path_sum = .0f;
+        for (auto &weight: m_closed_set) {
+            if (weight) {
+                weight_sum += static_cast<float>(weight);
+                ++valid_path_sum;
+            }
+        }
+        std::cout << "avg_weight = " << weight_sum << " / " << valid_path_sum << " = " <<
+                  static_cast<float>(weight_sum / valid_path_sum) << std::endl;
     }
 
 private:
     // graph
     Graph *m_graph;
     // closed set, contains vertices already expanded
-    std::vector<bool> m_closed_set;
-    //
-    PriorityQ m_pq;
+    std::vector<uint> m_closed_set;
 };
 
-int main()
-{
+int main() {
     std::cout << "Hello, World!" << std::endl;
 
-    auto graph = Graph(0.1, 10);
-    auto dij = ShortestPath(graph);
-    dij.Solve();
-    dij.Print();
+    std::vector<float> densities = {0.2f, 0.4f, 0.5f};
+    for (auto &d: densities) {
+        Graph graph(d, 50);
+        auto dij = ShortestPath(graph);
+        dij.Solve();
+        dij.Print();
+    }
 
     return 0;
 }
