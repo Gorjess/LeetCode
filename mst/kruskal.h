@@ -14,13 +14,13 @@
 
 
 // { weight: {from, to} }
-using edges_type = PriorityQ<std::pair<uint, std::pair<uint, uint>>>;
+using edges_type = PriorityQ <std::pair<uint, std::pair < uint, uint>>>;
 
 
 class KruskalSolution {
 
 public:
-    KruskalSolution(Graph& graph) {
+    KruskalSolution(Graph &graph) {
         // sort edges by weight.
         for (uint i = 0; i < graph.vertex_n(); ++i)
             for (uint j = 0; j < graph.vertex_n(); ++j) {

@@ -39,8 +39,8 @@ public:
                 if (i == j)
                     m_graph[i][j] = 0;
                 else if (!m_graph[j][i])
-                    m_graph[i][j] =
-                    m_graph[j][i] = m_re_density.Gen() < m_density ? edge_random_engine.Gen() : 0;
+                    m_graph[i][j] = m_graph[j][i] =
+                            m_re_density.Gen() < m_density ? edge_random_engine.Gen() : 0;
     }
 
     // "[[nodiscard]]" suggests that you should always use the returned value of a getter
@@ -55,8 +55,8 @@ public:
     [[nodiscard]] uint xy_weight(uint x, uint y) { return m_graph[x][y]; }
 
     // lists all nodes y such that there is an edge from x to y.
-    std::vector<uint> neighbors(uint x) {
-        std::vector<uint> nbrs;
+    std::vector <uint> neighbors(uint x) {
+        std::vector <uint> nbrs;
         auto vn = vertex_n();
         if (x >= vn)
             return nbrs;
@@ -66,8 +66,8 @@ public:
         return nbrs;
     }
 
-    // list sub-array by index i
-    std::array<uint, vertex_number> *sub_array(uint i) {
+    // return sub-array by index i
+    std::array <uint, vertex_number> *sub_array(uint i) {
         if (i < 0 || i >= vertex_n())
             return nullptr;
         return &m_graph[i];
@@ -78,7 +78,7 @@ public:
         auto vn = vertex_n();
         if (x >= vn || y >= vn)
             return;
-        if (m_graph[x][y])
+        if (!m_graph[x][y])
             m_graph[x][y] = weight;
     }
 
@@ -110,7 +110,7 @@ private:
     int m_density;
     RandomEngine<int> m_re_density = RandomEngine<int>(10);
     // adjacency matrix describing connectivity and edge-value.
-    std::array<std::array<uint, vertex_number>, vertex_number> m_graph{};
+    std::array <std::array<uint, vertex_number>, vertex_number> m_graph{};
 };
 
 class Vertex {

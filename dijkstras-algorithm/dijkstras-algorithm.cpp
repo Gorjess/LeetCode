@@ -1,10 +1,12 @@
 #include <iostream>
+#include <algorithm>
 #include <queue>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "graph.h"
 
-using pq_type = std::priority_queue<Vertex, std::vector<Vertex>, std::greater<>>;
+using pq_type = std::priority_queue <Vertex, std::vector<Vertex>, std::greater<>>;
 
 class PriorityQ {
 public:
@@ -17,7 +19,7 @@ public:
         iter->second->set_expired();
 
         auto vtx = Vertex{idx, value};
-        m_pq.push(vtx);  // todo: try use emplace.
+        m_pq.push(vtx);  // to avoid copy, try use emplace.
         m_vertices.insert({idx, &vtx});
     }
 
@@ -66,6 +68,7 @@ public:
 
     void Solve() {
         auto open_set = PriorityQ();
+        std::unordered_set <uint> closed_set;
         auto vn = m_graph->vertex_n();
 
         // starts from vertex-0
@@ -73,51 +76,46 @@ public:
 
         while (!open_set.empty()) {
             auto top = open_set.min_priority();
-            auto top_idx = top.get_index();
+            auto top_i = top.get_index();
+            closed_set.insert(top_i);
 
-            auto sub_arr = m_graph->sub_array(top_idx);
+            auto sub_arr = *(m_graph->sub_array(top_i));
             for (int i = 0; i < vn; i++) {
-                auto weight_top2i = (*sub_arr)[i];
-                auto weight_sum_i = m_closed_set[i];
+                if (i == top_i || closed_set.find(i) != closed_set.end())
+                    continue;
                 // add adjacency vertex to open set
-                if (m_closed_set[top_idx] > weight_sum_i + weight_top2i) {
-                    m_closed_set[top_idx] = weight_sum_i + weight_top2i;
-                    open_set.insert(i, m_closed_set[top_idx]);
-                }
-
+                open_set.insert(i, sub_arr[i]);
             }
+        }
+
+        auto vn = m_graph->vertex_n();
+        for (int i = 1; i < vn; ++i) {
+            for (int j = 1; j < vn; ++j)
+                if (!m_closed_set[i] && m_graph->adjacent(0, i))
+                    m_open_set.push_back(j);
         }
     }
 
     void Print() const {
-        float weight_sum = .0f, valid_path_sum = .0f;
-        for (auto &weight: m_closed_set) {
-            if (weight) {
-                weight_sum += static_cast<float>(weight);
-                ++valid_path_sum;
-            }
-        }
-        std::cout << "avg_weight = " << weight_sum << " / " << valid_path_sum << " = " <<
-                  static_cast<float>(weight_sum / valid_path_sum) << std::endl;
+        m_graph->Print();
     }
 
 private:
     // graph
     Graph *m_graph;
     // closed set, contains vertices already expanded
-    std::vector<uint> m_closed_set;
+    std::vector<bool> m_closed_set;
+    //
+    PriorityQ m_pq;
 };
 
 int main() {
     std::cout << "Hello, World!" << std::endl;
 
-    std::vector<float> densities = {0.2f, 0.4f, 0.5f};
-    for (auto &d: densities) {
-        Graph graph(d, 50);
-        auto dij = ShortestPath(graph);
-        dij.Solve();
-        dij.Print();
-    }
+    auto graph = Graph(0.1, 10);
+    auto dij = ShortestPath(graph);
+    dij.Solve();
+    dij.Print();
 
     return 0;
 }
