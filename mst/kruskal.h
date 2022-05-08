@@ -20,6 +20,7 @@ using edges_type = PriorityQ <std::pair<uint, std::pair < uint, uint>>>;
 class KruskalSolution {
 
 public:
+    // Constructor
     KruskalSolution(Graph &graph) {
         // sort edges by weight.
         for (uint i = 0; i < graph.vertex_n(); ++i)
@@ -28,6 +29,9 @@ public:
                 m_edges.insert(pr);
             }
     }
+
+    // determine whether two vertices are part of the same tree
+
 
 private:
     edges_type m_edges;
