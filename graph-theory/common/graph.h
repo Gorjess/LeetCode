@@ -17,8 +17,8 @@
  * An Undirected graph.
  *
  * An adjacency matrix is used to represent the graph,
- * for it is always faster than adjacency list.
- * Dynamicly choose the underlying ADT by density would be more elegant,
+ * for it is always faster than adjacency list (I guess :<.
+ * Choosing the underlying ADT by density dynamically would be more elegant,
  * but it requires more work to make the code applies to both ADT.
  * */
 class Graph {
